@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>弹球</title>
+	<meta name="viewport" content="width=640,target-densitydpi=320,user-scalable=no">
+	<style type="text/css">
+		*{
+			margin: 0;
+			padding: 0;
+		}
+		html,body{
+			width: 100%;
+			height: 100%;
+		}
+		img{
+			position: absolute;
+			top:950px;
+			left: 250px;
+			/*trans*/
+			transform:rotate(90deg);
+		}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" width="640px" height="1072px"></canvas>
+	<!-- <img src="arrow.png"> -->
+</body>
+<script type="text/javascript">
+	var canvas = document.getElementById("canvas");
+	var X,Y;
+	var SPEED = 5;
+	var ctx = canvas.getContext('2d');
+	var IMG_list = {
+		arrow:"arrow.png",
+		ball:"ball2.png",
+		circle:"circle_out.png",
+		bg:"run_bg.jpg"
+	};
+	var bg;
+	var ball = [];
+	function pic_load(prefix,list,callback){
+		var n;
+		var num = 0;
+		for(n in list){
+			num++;
+		}
+		for(n in list){
+			var img = prefix + list[n];
+			console.log(prefix + list[n])
+			list[n] = new Image();
+			list[n].src = img;
+			list[n].onload = function(){
+				num--;
+				if(num <= 0){
+					console.log(22)
+					callback(list);
+				}
+			}
+		}
+	}
+	pic_load("",IMG_list,init);
+
+	function init(img_list){
+		IMG_list = img_list;
+		ctx.drawImage(img_list["bg"],0,0);
+		ctx.drawImage(img_list["circle"],215,905);
+		bg = ctx.getImageData(0,0,640,1072);
+		setInterval(ball_in,1000);
+		setInterval(move,10);
+	}
+
+	canvas.addEventListener("touchstart",function(event){
+		X = event.touches[0].clientX;
+		Y = event.touches[0].clientY;
+		console.log(X)
+	});
+	canvas.addEventListener("touchmove",function(event){
+		X = event.touches[0].clientX;
+		Y = event.touches[0].clientY;
+		console.log(X)
+	});
+
+	function move(){
+		// console.log(1)
+		ctx.putImageData(bg,0,0);
+		ctx.save();
+		ctx.translate(330,1072);
+		for(n in ball){
+			ctx.drawImage(IMG_list["ball"],ball[n].x,ball[n].y);
+			console.log(ball[n].x,ball[n].y)
+			ball[n].y = ball[n].y - SPEED;
+			ball[n].x = ball[n].x + ball[n].speed*SPEED;
+			
+			ball[n].live++;
+			if(ball[n].live > 1000){
+				ball.splice(n,1);
+			}
+		}
+		var x = X - 320,
+			y = 1072 - Y;
+		// ctx.rotate((X/640)*Math.PI);
+		ctx.rotate(Math.atan2(y,-x))
+		ctx.drawImage(IMG_list["arrow"],-168,-57);
+
+		ctx.restore();
+		ctx.save();
+	}
+	function ball_in(){
+		var x = X - 320,
+			y = 1072 - Y;
+		var new_ball = {
+			x:-51,
+			y:-51,
+			speed:x/y,
+			live:0
+		}
+		ball.push(new_ball);
+	}
+
+</script>
+</html>
